@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Live Location</title>
+
+    <style>
+        /* CSS for the modal */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal content */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Modal for asking location permission -->
+    <div id="locationModal" class="modal">
+        <div class="modal-content">
+            <h2>Location Access</h2>
+            <p>This website would like to access your location to provide personalized services.</p>
+            <button id="allowLocation">Allow</button>
+        </div>
+    </div>
+
+    <!-- Map container -->
+    <div id="map"></div>
+
+    <script>
+        // Function to check location permission and show modal if necessary
+        function checkLocationPermission() {
+            if (navigator.permissions) {
+                navigator.permissions.query({name: 'geolocation'}).then(function(permissionStatus) {
+                    if (permissionStatus.state !== 'granted') {
+                        showLocationModal();
+                    } else {
+                        getLocation();
+                    }
+                });
+            } else {
+                // Browser does not support navigator.permissions
+                // Show location modal as fallback
+                showLocationModal();
+            }
+        }
+
+        // Function to show the location permission modal
+        function showLocationModal() {
+            var modal = document.getElementById('locationModal');
+            modal.style.display = 'block';
+
+            // Event listener for the "Allow" button
+            document.getElementById('allowLocation').addEventListener('click', function() {
+                modal.style.display = 'none';
+                getLocation();
+            });
+        }
+
+        // Function to get user's location
+        function getLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    var latitude = position.coords.latitude;
+                    var longitude = position.coords.longitude;
+                    // Construct Google Maps URL
+                    var mapUrl = 'https://www.google.com/maps?q=' + latitude + ',' + longitude;
+                    // Display Google Maps in an iframe
+                    document.getElementById('map').innerHTML = '<iframe width="100%" height="400" src="' + mapUrl + '" frameborder="0" allowfullscreen></iframe>';
+                });
+            } else {
+                alert('Geolocation is not supported by this browser.');
+            }
+        }
+
+        // Call checkLocationPermission function when the page loads
+        window.onload = checkLocationPermission;
+    </script>
+</body>
+</html>
