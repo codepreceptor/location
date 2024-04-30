@@ -1,13 +1,12 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, url_for, redirect, render_template
 
 app = Flask(__name__)
 
-# Store the live location
 live_location = None
 
 @app.route('/')
 def index():
-    return app.send_static_file('index.html')
+    return render_template('index.html')
 
 @app.route('/location', methods=['POST'])
 def location():
@@ -22,11 +21,14 @@ def get_live_location():
     if live_location:
         latitude = live_location.get('latitude')
         longitude = live_location.get('longitude')
-        # Construct Google Maps URL with latitude and longitude
-        map_url = f'https://www.google.com/maps?q={latitude},{longitude}'
+        map_url = url_for('show_map', lat=latitude, lon=longitude, _external=True)
         return jsonify({'map_url': map_url})
     else:
         return jsonify({'message': 'No live location available'})
 
-if __name__ == '__main__':
-    app.run(debug=True, ssl_context=('cert.pem', 'key.pem'))
+@app.route('/map')
+def show_map():
+    latitude = request.args.get('lat')
+    longitude = request.args.get('lon')
+    map_url = f'https://www.google.com/maps?q={latitude},{longitude}'
+    return redirect(map_url)
